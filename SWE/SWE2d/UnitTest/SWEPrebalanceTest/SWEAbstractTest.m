@@ -2,7 +2,8 @@ classdef SWEAbstractTest < SWEPreBlanaced2d
     %ABSTRACTSWEPREBALANCETEST 此处显示有关此类的摘要
     %   此处显示详细说明
     methods
-        function obj = SWEAbstractTest(mesh)
+        function obj = SWEAbstractTest(N,M,type)
+            mesh = makeUniformMesh(N,M,type);
             obj = obj@SWEPreBlanaced2d();
             obj.initPhysFromOptions( mesh );
         end
@@ -38,4 +39,23 @@ classdef SWEAbstractTest < SWEPreBlanaced2d
     end
     
 end
+
+function mesh = makeUniformMesh(N, M, type)
+bctype = [NdgEdgeType.Clamped, NdgEdgeType.Clamped, ...
+    NdgEdgeType.Clamped, NdgEdgeType.Clamped];
+
+if (type == NdgCellType.Tri)
+    mesh = makeUniformTriMesh(N, [-1, 1], [-1, 1], ...
+        M, M-1, bctype);
+elseif(type == NdgCellType.Quad)
+    mesh = makeUniformQuadMesh(N, [-1, 1], [-1, 1], ...
+        M, M-1, bctype);
+else
+    msgID = [mfilename, ':inputCellTypeError'];
+    msgtext = ['The input cell type should be NdgCellType.Tri',...
+        ' or NdgCellType.Tri.'];
+    ME = MException(msgID, msgtext);
+    throw(ME);
+end
+end% func
 
