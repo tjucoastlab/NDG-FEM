@@ -2,30 +2,43 @@
 
 # 1. 测试的函数
 
-Sealed：
 
-1.体通量函数：[ E, G ] = matEvaluateFlux( obj, mesh, fphys )；
+1.体通量测试函数：testVolumeFlux
 
-2.边界内外值计算函数：[ fM, fP ] = matEvaluateSurfaceValue( obj, mesh, fphys, fext )；
+调用公有函数 obj.matEvaluateFlux(mesh,fphys),返回[ E,G ];
 
-3.面通量函数：[ fluxM ] = mxEvaluateSurfFlux( obj.hmin, obj.gra, nx, ny, fm)；
+2.边界内外值测试函数： testFaceValue
 
-4.面数值通量函数：[ fluxS ] = obj.numfluxSolver.evaluate( obj.hmin, obj.gra, nx, ny, fm, fp );
+调用Sealed函数 obj.matEvaluateSurfaceValue( mesh, fphys, fext ),返回[ fM, fP ];
 
-5.更新时间步函数：[ dt ] = matUpdateTimeInterval( obj, fphys )；
+3.面通量测试函数：testFaceFlux
 
-Abstract：
+调用Sealed函数 obj.mxEvaluateSurfFlux( hmin, gra, nx, ny, fm),返回fluxM;
 
-1.PostFunction函数：[ fphys ] = matEvaluatePostFunc(obj, fphys)；
+4.面数值通量测试函数：testNumFlux
 
-2.更新干湿状态函数：matUpdateWetDryState(obj, fphys)；
+调用sealed函数 obj.numfluxSolver.evaluate( hmin, gra, nx, ny, fm, fp )，返回fluxS;
 
-3.源项函数：[ ] = matEvaluateSourceTerm( obj, fphys )；
-包括：
-3.1底坡源项函数：obj.matEvaluateTopographySourceTerm( fphys );
-3.2科氏力项函数：obj.coriolisSolver.evaluateCoriolisTermRHS(obj, fphys);
-3.3底摩阻项函数：obj.frictionSolver.evaluateFrictionTermRHS(obj, fphys);
-3.4风应力项函数：obj.windSolver.evaluateWindTermRHS(obj, fphys);
+5.时间步测试函数：testTimeStep
+
+调用保护类函数 obj.matUpdataTimeInterval(fphys)，返回[ dt ];
+
+6.底坡源项测试函数: testTopographySourceTerm
+
+调用保护类函数 obj.matEvaluateTopographySourceTerm(fphys);
+
+7.科氏力测试函数： testCoriolisTerm
+
+调用函数obj.coriolisSolver.evaluateCoriolisTermRHS(obj, fphys);
+
+8.风应力测试函数：testWindForceTerm
+
+调用函数 obj.windSolver.evaluateWindTermRHS(fphys);
+
+9.底摩阻测试函数： testBottomFrictionTerm
+
+调用函数 obj.frictionSolver.evaluateFrictionTermRHS(fphys);
+
 
 
 

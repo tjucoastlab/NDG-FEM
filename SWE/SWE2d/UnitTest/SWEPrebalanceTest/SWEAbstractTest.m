@@ -8,16 +8,42 @@ classdef SWEAbstractTest < SWEPreBlanaced2d
             obj.initPhysFromOptions( mesh );
         end
         
-        function PrivateFunctionTest(obj)
-        %> determine time interval
-        [ ~ ] = matUpdateTimeInterval( obj, fphys );
+        function [E, G] = testVolumeFlux(obj, fphys)
+            [E, G] = obj.matEvaluateFlux(mesh,fphys);
+        end
         
-        %> evaluate source term
-        [~] = matEvaluateSourceTerm( obj, fphys );
+        function [ fM, fP ] = testFaceValue(mesh,fphys,fext)
+            [ fM, fP ] = obj.matEvaluateSurfaceValue( mesh, fphys, fext );
+        end
         
-        %> evaluate topography source term
-        [~] = matEvaluateTopographySourceTerm( obj, fphys );
-        end 
+        function [fluxM] = testFaceFlux( hmin, gra, nx, ny, fm) 
+           [fluxM] = obj.mxEvaluateSurfFlux( hmin, gra, nx, ny, fm);
+        end
+        
+        function [fluxS] = testNumFlux( hmin, gra, nx, ny, fm, fp )
+            [fluxS] = obj.numfluxSolver.evaluate( hmin, gra, nx, ny, fm, fp );
+        end
+        
+        function [dt] = testTimeStep(fphys)
+            [dt] = obj.matUpdataTimeInterval(fphys);
+        end
+        
+        function [ ] = testTopographySourceTerm(fphys)
+            [~] = obj.matEvaluateTopographySourceTerm(fphys);
+        end
+        
+        function [] = testCoriolisTerm(fphys)
+            [~] = obj.coriolisSolver.evaluateCoriolisTermRHS( fphys);
+        end
+        
+        function [] = testWindForceTerm(fphys)
+            [~] = obj.windSolver.evaluateWindTermRHS(fphys);
+        end
+        
+        function [] = testBottomFrictionTerm(fphys)
+            [~] = obj.frictionSolver.evaluateFrictionTermRHS(fphys);
+        end
+
     end
     
     methods(Access=protected)
