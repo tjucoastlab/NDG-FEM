@@ -83,7 +83,7 @@ classdef Malpasset2d < SWEPreBlanaced2d
             option('limiterType') = NdgLimiterType.Vert;
             option('equationType') = NdgDiscreteEquationType.Strong;
             option('integralType') = NdgDiscreteIntegralType.QuadratureFree;
-            option('FrictionType') = FrictionType.Manning;
+%             option('FrictionType') = FrictionType.Manning;
             option('FrictionCoefficient_n') = obj.n;
         end
         

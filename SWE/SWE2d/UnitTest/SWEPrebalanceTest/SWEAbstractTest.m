@@ -9,7 +9,7 @@ classdef SWEAbstractTest < SWEPreBlanaced2d
         end
         
         function [E, G] = testVolumeFlux(obj, fphys)
-            [E, G] = obj.matEvaluateFlux(mesh,fphys);
+            [E, G] = obj.matEvaluateFlux(obj.meshUnion(1),fphys);
         end
         
         function [ fM, fP ] = testFaceValue(mesh,fphys,fext)
