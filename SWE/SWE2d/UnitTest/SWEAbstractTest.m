@@ -12,7 +12,7 @@ classdef SWEAbstractTest < SWEConventional2d
             [E, G] = obj.matEvaluateFlux(obj.meshUnion(1),fphys);
         end
         
-        function [ fM, fP ] = getFaceValue(mesh,fphys,fext)
+        function [ fM, fP ] = getFaceValue(obj,mesh,fphys,fext)
             [ fM, fP ] = obj.matEvaluateSurfaceValue( mesh, fphys, fext );
         end
         
@@ -81,8 +81,8 @@ classdef SWEAbstractTest < SWEConventional2d
 end
 
 function mesh = makeUniformMesh(N, M, type)
-bctype = [NdgEdgeType.Clamped, NdgEdgeType.Clamped, ...
-    NdgEdgeType.Clamped, NdgEdgeType.Clamped];
+bctype = [NdgEdgeType.ZeroGrad, NdgEdgeType.ZeroGrad, ...
+    NdgEdgeType.ZeroGrad, NdgEdgeType.ZeroGrad];
 
 if (type == NdgCellType.Tri)
     mesh = makeUniformTriMesh(N, [-1, 1], [-1, 1], ...
