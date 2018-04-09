@@ -14,27 +14,17 @@ classdef SWEFlatBotStillWater < SWEAbstractTest
             obj = obj@SWEAbstractTest(N,M,type);
         end
         
-        function test(obj)
+        function testRhs(obj)
             ExactRhs = obj.getExactRhs;
             Rhs = obj.getRhs;
-            for i = 1:obj.Nvar
-                for j = 1:obj.meshUnion(1).K
-                    for k = 1:obj.meshUnion(1).cell.Np
-                        assert( abs(ExactRhs{1}(k,j,i)-Rhs{1}(k,j,i)) <= obj.tol );
-                    end
-                end
-            end
+            obj.Assert(ExactRhs{1}, Rhs{1});
+        end
+        
+        function testFaceValve(obj)
             [ExactfM, ExactfP] = obj.getExactFaceValue;
-            [fM, fP] = obj.getFaceValue(obj.meshUnion(1),obj.fphys{1},obj.fext{1});
-            for i = 1:obj.Nvar
-                for j = 1:obj.meshUnion(1).K
-                    for k = 1:obj.meshUnion(1).cell.TNfp
-                        assert( abs(ExactfM(k,j,i)-fM(k,j,i)) <= obj.tol );
-                        assert( abs(ExactfP(k,j,i)-fP(k,j,i)) <= obj.tol );
-                    end
-                end
-            end
-            
+            [fM, fP] = obj.matEvaluateSurfaceValue(obj.meshUnion(1),obj.fphys{1},obj.fext{1});
+            obj.Assert(ExactfM, fM);
+            obj.Assert(ExactfP, fP);
         end
         
         function Rhs = getExactRhs(obj)
@@ -43,11 +33,10 @@ classdef SWEFlatBotStillWater < SWEAbstractTest
         end
         
         function [ExactfM, ExactfP] = getExactFaceValue(obj)
-            ExactfM = zeros( obj.meshUnion(1).cell.TNfp, obj.meshUnion(1).K, obj.Nfield );
-            ExactfP = zeros( obj.meshUnion(1).cell.TNfp, obj.meshUnion(1).K, obj.Nfield );
+            ExactfM = zeros( obj.meshUnion(1).cell.TNfp, obj.meshUnion(1).K, obj.Nvar );
+            ExactfP = zeros( obj.meshUnion(1).cell.TNfp, obj.meshUnion(1).K, obj.Nvar );
             ExactfM(:,:,1) = 1;ExactfP(:,:,1) = 1;
-        end 
-        
+        end
     end
     
     methods(Access=protected)
@@ -56,6 +45,38 @@ classdef SWEFlatBotStillWater < SWEAbstractTest
             fphys{1} = zeros( obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nfield );
             fphys{1}(:,:,1) = 1;
         end% func
+        
+        function Assert(obj, Exact, Numerical )
+            checkinput( Exact, Numerical);
+            Ind1 = size(Exact,1);Ind2 = size(Exact,2);Ind3 = size(Exact,3);
+            for i = 1:Ind1
+                for j = 1:Ind2
+                    for k = 1:Ind3
+                        assert( abs(Exact(i,j,k)- Numerical(i,j,k)) <= obj.tol );
+                    end
+                end
+            end
+        end
+        
+        function Rhs  = getRhs(obj)
+            [E, G] = obj.matEvaluateFlux(obj.meshUnion(1),obj.fphys{1});
+            for i = 1:obj.Nvar
+                [ obj.frhs{1}(:,:,i) ] = ...
+                    - obj.advectionSolver.rx{1}.*( obj.advectionSolver.Dr{1} * E(:,:,i) ) ...
+                    - obj.advectionSolver.sx{1}.*( obj.advectionSolver.Ds{1} * E(:,:,i) ) ...
+                    - obj.advectionSolver.ry{1}.*( obj.advectionSolver.Dr{1} * G(:,:,i) ) ...
+                    - obj.advectionSolver.sy{1}.*( obj.advectionSolver.Ds{1} * G(:,:,i) ) ;
+            end
+            obj.matEvaluateSourceTerm(obj.fphys);
+            Rhs = obj.frhs;
+        end
     end
 end
 
+function checkinput( Exact, Numerical)
+if  sum(size(Exact) ~= size(Numerical))
+    msgID = [ mfilename, ':MatrixSize mismatch'];
+    msgtext = ('The matrix size is not equal, check again');
+    throw( MException(msgID, msgtext) );
+end
+end

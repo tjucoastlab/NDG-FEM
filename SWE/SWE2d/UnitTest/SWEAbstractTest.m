@@ -7,15 +7,7 @@ classdef SWEAbstractTest < SWEConventional2d
             obj = obj@SWEConventional2d();
             obj.initPhysFromOptions( mesh );
         end
-        
-        function [E, G] = getVolumeFlux(obj, fphys)
-            [E, G] = obj.matEvaluateFlux(obj.meshUnion(1),fphys);
-        end
-        
-        function [ fM, fP ] = getFaceValue(obj,mesh,fphys,fext)
-            [ fM, fP ] = obj.matEvaluateSurfaceValue( mesh, fphys, fext );
-        end
-        
+
         function [fluxM] = getFaceFlux( hmin, gra, nx, ny, fm)
             [fluxM] = obj.mxEvaluateSurfFlux( hmin, gra, nx, ny, fm);
         end
@@ -43,21 +35,6 @@ classdef SWEAbstractTest < SWEConventional2d
         function [] = getBottomFrictionTerm(fphys)
             [~] = obj.frictionSolver.evaluateFrictionTermRHS(fphys);
         end
-        
-        function Rhs  = getRhs(obj)
-            [E, G] = obj.getVolumeFlux(obj.fphys{1});
-            for i = 1:obj.Nvar
-                [ obj.frhs{1}(:,:,i) ] = ...
-                    - obj.advectionSolver.rx{1}.*( obj.advectionSolver.Dr{1} * E(:,:,i) ) ...
-                    - obj.advectionSolver.sx{1}.*( obj.advectionSolver.Ds{1} * E(:,:,i) ) ...
-                    - obj.advectionSolver.ry{1}.*( obj.advectionSolver.Dr{1} * G(:,:,i) ) ...
-                    - obj.advectionSolver.sy{1}.*( obj.advectionSolver.Ds{1} * G(:,:,i) ) ;
-            end
-            obj.matEvaluateSourceTerm(obj.fphys);
-            Rhs = obj.frhs;
-        end
-        
-        
     end
     
     methods(Access=protected)
